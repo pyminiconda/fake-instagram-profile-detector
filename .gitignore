@@ -7,8 +7,8 @@ env/
 # Database
 app.db
 
-# Models
-models/*.pkl
+# Models (removed strict ignore to bundle)
+# models/*.pkl
 
 # Python
 __pycache__/
@@ -28,9 +28,6 @@ build/
 # OS
 .DS_Store
 Thumbs.db
-
-# Data cache
-data/instafake_dataset.csv
 
 # Temp reports
 reports/
