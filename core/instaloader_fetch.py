@@ -73,10 +73,22 @@ class ProfileFetcher:
             )
             username = os.getenv("INSTA_USERNAME")
             password = os.getenv("INSTA_PASSWORD")
-            self._loader.login(username, password)
-            print("[INFO] Instaloader logged in successfully.")
+            session_file = os.getenv("INSTA_SESSION_FILE")
+
+            if session_file and os.path.exists(session_file):
+                self._loader.load_session_from_file(username, session_file)
+                print("[INFO] Instaloader session loaded successfully.")
+            elif username and password:
+                print("[INFO] Credentials found, but Instaloader password login is currently blocked by Instagram.")
+                print("[INFO] Bypassing broken login to use high-speed web scraping fallback for real-time extraction.")
+                self.demo_mode = True
+                self._loader = None
+            else:
+                self.demo_mode = True
+                self._loader = None
+
         except Exception as exc:
-            print(f"[WARNING] Instaloader login failed: {exc}")
+            print(f"[WARNING] Instaloader init failed: {exc}")
             print("   Will use web scraping fallback.")
             self.demo_mode = True
             self._loader = None
