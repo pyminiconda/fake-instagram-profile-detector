@@ -1,0 +1,55 @@
+erDiagram
+    USERS ||--o{ SEARCH_HISTORY : "performs"
+    MODEL_METADATA ||--o{ SEARCH_HISTORY : "used_for"
+
+    USERS {
+        TEXT userId PK
+        TEXT username "UNIQUE"
+        TEXT email "UNIQUE"
+        TEXT hashedPassword
+        INTEGER is_admin
+        TEXT createdAt
+        TEXT lastLogin
+    }
+
+    SEARCH_HISTORY {
+        TEXT historyId PK
+        TEXT userId FK
+        TEXT modelId FK
+        TEXT queriedUsername
+        TEXT resultLabel
+        REAL confidenceScore
+        TEXT featureImportance "JSON"
+        TEXT predictedAt
+        TEXT exportedAs
+    }
+
+    MODEL_METADATA {
+        TEXT modelId PK
+        TEXT algorithmType
+        TEXT version
+        REAL accuracy
+        REAL precision_score
+        REAL recall
+        REAL f1Score
+        REAL aucRoc
+        INTEGER isBestModel
+        TEXT filePath
+        TEXT trainedAt
+    }
+
+    PROFILE_CACHE {
+        TEXT cacheId PK
+        TEXT username "INDEXED"
+        INTEGER followersCount
+        INTEGER followingCount
+        INTEGER postsCount
+        INTEGER isPrivate
+        INTEGER isVerified
+        INTEGER hasProfilePicture
+        TEXT biography
+        TEXT externalUrl
+        TEXT fullName
+        TEXT fetchedAt
+        TEXT expiresAt
+    }

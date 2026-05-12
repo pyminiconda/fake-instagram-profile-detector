@@ -1,0 +1,150 @@
+@startuml
+' ══════════════════════════════════════════════════
+' UML 2.x Component Diagram
+' Fake Instagram Profile Detection System
+' ══════════════════════════════════════════════════
+
+skinparam componentStyle uml2
+skinparam BackgroundColor White
+skinparam defaultFontName Arial
+
+skinparam package {
+    BackgroundColor White
+    BorderColor Black
+    FontStyle bold
+}
+
+skinparam component {
+    BackgroundColor White
+    BorderColor Black
+}
+
+skinparam interface {
+    BackgroundColor White
+    BorderColor Black
+}
+
+skinparam artifact {
+    BackgroundColor White
+    BorderColor Black
+}
+
+skinparam cloud {
+    BackgroundColor White
+    BorderColor Black
+    BorderStyle dashed
+}
+
+' ══════════════════════════════════════════════════
+' 1. Presentation Layer
+' ══════════════════════════════════════════════════
+package "Presentation Layer" <<Subsystem>> {
+    [Auth UI] as AuthUI
+    [Dashboard UI] as DashboardUI
+    [Batch Analysis UI] as BatchUI
+    [History UI] as HistoryUI
+    [Admin Tools UI] as AdminUI
+}
+
+' ══════════════════════════════════════════════════
+' 2. Core Business Logic Layer
+' ══════════════════════════════════════════════════
+package "Core Business Logic" <<Subsystem>> {
+    [Profile Fetcher] as ProfFetch
+    [Feature Extractor] as FeatExt
+    [Prediction Engine] as PredEngine
+    [History Manager] as HistMgr
+    [Report Generator] as RepGen
+}
+
+' ══════════════════════════════════════════════════
+' Provided Interfaces (Lollipop notation)
+' ══════════════════════════════════════════════════
+interface "IProfileFetch" as IPF
+interface "IPrediction" as IPred
+interface "IHistory" as IHist
+interface "IReport" as IRep
+interface "IFeatureExtraction" as IFeat
+
+ProfFetch -down- IPF
+PredEngine -down- IPred
+HistMgr -down- IHist
+RepGen -down- IRep
+FeatExt -down- IFeat
+
+' ══════════════════════════════════════════════════
+' 3. Machine Learning Pipeline
+' ══════════════════════════════════════════════════
+package "ML Pipeline" <<Subsystem>> {
+    [Data Manager] as DataMgr
+    [Preprocessor] as Preprocess
+    [Model Trainer] as Trainer
+    [Model Evaluator] as Evaluator
+
+    interface "IPreprocessing" as IPrep
+    interface "ITraining" as ITrain
+
+    Preprocess -right- IPrep
+    Trainer -right- ITrain
+}
+
+' ══════════════════════════════════════════════════
+' 4. Data and Storage Layer
+' ══════════════════════════════════════════════════
+package "Data & Storage" <<Subsystem>> {
+    artifact "app.db" as DB <<artifact>>
+    artifact "best_model.pkl\nscaler.pkl" as ModelStore <<artifact>>
+    artifact "instafake_dataset.csv" as CSVStore <<artifact>>
+
+    interface "IStorage" as IStor
+    DB -up- IStor
+}
+
+' ══════════════════════════════════════════════════
+' External Services
+' ══════════════════════════════════════════════════
+cloud "External APIs\n(Apify / RapidAPI)" as ExtAPI
+
+' ══════════════════════════════════════════════════
+' Dependencies: Presentation --> Core Interfaces
+' ══════════════════════════════════════════════════
+DashboardUI ..> IPF : <<use>>
+DashboardUI ..> IPred : <<use>>
+DashboardUI ..> IHist : <<use>>
+DashboardUI ..> IRep : <<use>>
+BatchUI ..> IPred : <<use>>
+BatchUI ..> IHist : <<use>>
+HistoryUI ..> IHist : <<use>>
+AuthUI ..> IStor : <<use>>
+AdminUI ..> IPrep : <<use>>
+
+' ══════════════════════════════════════════════════
+' Dependencies: Core Internal
+' ══════════════════════════════════════════════════
+ProfFetch ..> IFeat : <<use>>
+PredEngine ..> IFeat : <<use>>
+HistMgr ..> IRep : <<use>>
+HistMgr ..> IStor : <<use>>
+ProfFetch ..> IStor : <<use>>
+
+' ══════════════════════════════════════════════════
+' Dependencies: ML Pipeline
+' ══════════════════════════════════════════════════
+DataMgr ..> IPrep : <<use>>
+Trainer ..> ITrain
+Evaluator ..> ITrain : <<use>>
+
+' ══════════════════════════════════════════════════
+' Dependencies: Data Access
+' ══════════════════════════════════════════════════
+PredEngine ..> ModelStore : <<use>>
+Evaluator ..> ModelStore : <<use>>
+Preprocess ..> ModelStore : <<use>>
+DataMgr ..> CSVStore : <<use>>
+
+' ══════════════════════════════════════════════════
+' External Dependency
+' ══════════════════════════════════════════════════
+ProfFetch ..> ExtAPI : <<use>>
+
+@enduml

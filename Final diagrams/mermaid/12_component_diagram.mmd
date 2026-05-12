@@ -1,0 +1,87 @@
+%% ══════════════════════════════════════════════════
+%% UML Component Diagram (Mermaid Approximation)
+%% Fake Instagram Profile Detection System
+%% Note: Mermaid lacks native UML component notation
+%%       (no lollipop/socket). This uses flowchart
+%%       with dashed arrows and stereotype labels to
+%%       approximate UML 2.x conventions as closely
+%%       as possible. See the PlantUML version for
+%%       a fully standards-compliant diagram.
+%% ══════════════════════════════════════════════════
+flowchart TD
+    %% ── Styling ──
+    classDef comp fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    classDef artifact fill:#ffffff,stroke:#000000,stroke-width:1px,color:#000000
+    classDef external fill:#ffffff,stroke:#000000,stroke-width:2px,stroke-dasharray: 5 5,color:#000000
+
+    %% ── 1. Presentation Layer ──
+    subgraph Presentation ["«subsystem» Presentation Layer"]
+        direction LR
+        AuthUI["«component»<br/>Auth UI"]:::comp
+        DashboardUI["«component»<br/>Dashboard UI"]:::comp
+        BatchUI["«component»<br/>Batch Analysis UI"]:::comp
+        HistoryUI["«component»<br/>History UI"]:::comp
+        AdminUI["«component»<br/>Admin Tools UI"]:::comp
+    end
+
+    %% ── 2. Core Business Logic Layer ──
+    subgraph CoreServices ["«subsystem» Core Business Logic"]
+        direction LR
+        ProfFetch["«component»<br/>Profile Fetcher"]:::comp
+        FeatExt["«component»<br/>Feature Extractor"]:::comp
+        PredEngine["«component»<br/>Prediction Engine"]:::comp
+        HistMgr["«component»<br/>History Manager"]:::comp
+        RepGen["«component»<br/>Report Generator"]:::comp
+    end
+
+    %% ── 3. Machine Learning Pipeline ──
+    subgraph MLPipeline ["«subsystem» ML Pipeline"]
+        direction LR
+        DataMgr["«component»<br/>Data Manager"]:::comp
+        Preprocess["«component»<br/>Preprocessor"]:::comp
+        Trainer["«component»<br/>Model Trainer"]:::comp
+        Evaluator["«component»<br/>Model Evaluator"]:::comp
+    end
+
+    %% ── 4. Data and Storage Layer ──
+    subgraph DataLayer ["«subsystem» Data & Storage"]
+        direction LR
+        DB["«artifact»<br/>app.db"]:::artifact
+        ModelStore["«artifact»<br/>best_model.pkl"]:::artifact
+        CSVStore["«artifact»<br/>instafake_dataset.csv"]:::artifact
+    end
+
+    %% ── External Services ──
+    ExtAPI{{"«external»<br/>Apify / RapidAPI"}}:::external
+
+    %% ── Dependencies: Presentation to Core (dashed = «use») ──
+    DashboardUI -.->|"«use»"| ProfFetch
+    DashboardUI -.->|"«use»"| PredEngine
+    DashboardUI -.->|"«use»"| HistMgr
+    DashboardUI -.->|"«use»"| RepGen
+    BatchUI -.->|"«use»"| PredEngine
+    BatchUI -.->|"«use»"| HistMgr
+    HistoryUI -.->|"«use»"| HistMgr
+    AuthUI -.->|"«use»"| DB
+    AdminUI -.->|"«use»"| Preprocess
+
+    %% ── Dependencies: Core Service Interactions ──
+    ProfFetch -.->|"«use»"| FeatExt
+    FeatExt -.->|"«use»"| PredEngine
+    HistMgr -.->|"«use»"| RepGen
+    HistMgr -.->|"«use»"| DB
+    ProfFetch -.->|"«use»"| DB
+
+    %% ── Dependencies: ML Pipeline Flow ──
+    DataMgr -.->|"«use»"| Preprocess
+    Preprocess -.->|"«use»"| Trainer
+    Trainer -.->|"«use»"| Evaluator
+
+    %% ── Dependencies: Data Access ──
+    PredEngine -.->|"«use»"| ModelStore
+    Evaluator -.->|"«use»"| ModelStore
+    Preprocess -.->|"«use»"| ModelStore
+    DataMgr -.->|"«use»"| CSVStore
+
+    %% ── External Dependency ──
+    ProfFetch -.->|"«use»"| ExtAPI

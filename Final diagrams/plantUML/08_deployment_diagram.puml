@@ -1,0 +1,47 @@
+@startuml
+skinparam BackgroundColor White
+skinparam node {
+    BackgroundColor White
+    BorderColor Black
+}
+skinparam component {
+    BackgroundColor #e1f5fe
+    BorderColor #01579b
+}
+skinparam databaseBackgroundColor #e1f5fe
+skinparam artifactBackgroundColor #e1f5fe
+skinparam cloudBackgroundColor #fff3e0
+
+node "Client Device" <<Device>> {
+    component "Web Browser" as Browser
+}
+
+node "Application Server" <<Python Environment>> {
+    component "Streamlit Web Server" as Streamlit
+    component "Core Logic Services" as Core
+    component "ML Pipeline" as ML
+    
+    Streamlit -down- Core
+    Core -right- ML
+}
+
+node "Storage Server" <<Local File System>> {
+    database "SQLite Database\n(app.db)" as DB
+    artifact "Trained Models\n(.pkl)" as Models
+    artifact "Datasets\n(.csv)" as Datasets
+}
+
+cloud "External Services" {
+    component "Apify API" as Apify
+    component "RapidAPI" as Rapid
+}
+
+Browser <--> Streamlit : HTTPS / WSS
+Core --> DB : SQL Queries
+Core --> Models : Read
+ML --> Models : Read/Write
+ML --> Datasets : Read
+Core ..> Apify : HTTP Request
+Core ..> Rapid : HTTP Request
+
+@enduml

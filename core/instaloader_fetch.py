@@ -21,6 +21,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+try:
+    from apify_client import ApifyClient
+    HAS_APIFY = True
+except ImportError:
+    HAS_APIFY = False
+
 
 class ProfileNotFoundError(Exception):
     """Raised when the Instagram profile does not exist."""
@@ -51,6 +57,8 @@ class ProfileFetcher:
         self.db = db_manager
         self.demo_mode = _is_demo_mode()
         self._loader = None
+        self.apify_token = os.getenv("APIFY_TOKEN", "").strip()
+        self.rapidapi_key = os.getenv("RAPIDAPI_KEY", "").strip()
 
         if not self.demo_mode:
             self._init_instaloader()
@@ -118,9 +126,30 @@ class ProfileFetcher:
         if cached:
             return cached
 
-        # 2. Try Instaloader (if authenticated)
+        # 2. Try Apify (The most reliable method if token is provided)
+        if self.apify_token and HAS_APIFY:
+            try:
+                print(f"[INFO] Using Apify API to fetch @{username}...")
+                result = self._fetch_via_apify(username)
+                if result:
+                    return result
+            except Exception as exc:
+                print(f"[WARNING] Apify fetch failed: {exc}")
+
+        # 3. Try RapidAPI (Alternative reliable method if key is provided)
+        if self.rapidapi_key:
+            try:
+                print(f"[INFO] Using RapidAPI to fetch @{username}...")
+                result = self._fetch_via_rapidapi(username)
+                if result:
+                    return result
+            except Exception as exc:
+                print(f"[WARNING] RapidAPI fetch failed: {exc}")
+
+        # 4. Try Instaloader (if authenticated)
         if self._loader is not None:
             try:
+                print(f"[INFO] Using Instaloader to fetch @{username}...")
                 result = self._fetch_via_instaloader(username)
                 if result:
                     return result
@@ -130,8 +159,75 @@ class ProfileFetcher:
                 print(f"[WARNING] Instaloader fetch failed: {exc}")
                 print("   Trying web scraping fallback...")
 
-        # 3. Fallback: scrape Instagram's public web page
+        # 5. Fallback: scrape Instagram's public web page
+        print(f"[INFO] Using Web API Fallback to fetch @{username}...")
         return self._fetch_via_web(username)
+
+    def _fetch_via_apify(self, username: str) -> dict:
+        """Fetch profile using Apify's Instagram Profile Scraper."""
+        client = ApifyClient(self.apify_token)
+        run = client.actor("apify/instagram-profile-scraper").call(
+            run_input={"usernames": [username]}
+        )
+        items = list(client.dataset(run["defaultDatasetId"]).iterate_items())
+        
+        if not items:
+            raise ProfileNotFoundError(f"Apify: Profile '{username}' not found.")
+            
+        data = items[0]
+        
+        profile_data = self._build_profile_dict(
+            username=data.get("username", username),
+            followers=data.get("followersCount", 0),
+            following=data.get("followsCount", 0),
+            posts=data.get("postsCount", 0),
+            is_private=data.get("isPrivate", False),
+            is_verified=data.get("isVerified", False),
+            has_pic=bool(data.get("profilePicUrl")),
+            biography=data.get("biography", ""),
+            external_url=data.get("externalUrl", ""),
+            full_name=data.get("fullName", ""),
+        )
+        self.db.cache_profile(profile_data)
+        return profile_data
+
+    def _fetch_via_rapidapi(self, username: str) -> dict:
+        """Fetch profile using instagram120 from RapidAPI."""
+        url = "https://instagram120.p.rapidapi.com/api/instagram/profile"
+        payload = json.dumps({"username": username}).encode('utf-8')
+        headers = {
+            "Content-Type": "application/json",
+            "x-rapidapi-host": "instagram120.p.rapidapi.com",
+            "x-rapidapi-key": self.rapidapi_key
+        }
+        
+        req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=15) as response:
+                res_data = json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as e:
+            raise RateLimitError(f"RapidAPI HTTP Error: {e.code}")
+            
+        # The structure can vary, but usually it returns user info under a 'result' or 'data' key or directly at root.
+        user = res_data.get("result") or res_data.get("user") or res_data.get("data", {}).get("user") or res_data
+        
+        if not user or "username" not in user:
+            raise ProfileNotFoundError(f"RapidAPI: Profile '{username}' not found.")
+            
+        profile_data = self._build_profile_dict(
+            username=user.get("username", username),
+            followers=user.get("follower_count", user.get("edge_followed_by", {}).get("count", user.get("followers", 0))),
+            following=user.get("following_count", user.get("edge_follow", {}).get("count", user.get("following", 0))),
+            posts=user.get("media_count", user.get("edge_owner_to_timeline_media", {}).get("count", user.get("posts", 0))),
+            is_private=user.get("is_private", False),
+            is_verified=user.get("is_verified", False),
+            has_pic=bool(user.get("profile_pic_url", user.get("profile_pic_url_hd"))),
+            biography=user.get("biography", ""),
+            external_url=user.get("external_url", ""),
+            full_name=user.get("full_name", ""),
+        )
+        self.db.cache_profile(profile_data)
+        return profile_data
 
     def _fetch_via_instaloader(self, username: str) -> dict:
         """Fetch profile via authenticated Instaloader."""

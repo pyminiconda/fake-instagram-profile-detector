@@ -1,0 +1,43 @@
+%% ══════════════════════════════════════════════════
+%% UML Communication Diagram (Mermaid Approximation)
+%% Fake Instagram Profile Detection System
+%% Scenario: Single Profile Analysis
+%%
+%% Note: Mermaid lacks native communication diagram
+%%       support. This uses a flowchart LR layout with
+%%       numbered messages on links to approximate
+%%       the UML 2.x communication diagram format.
+%%       See the PlantUML version for closer compliance.
+%% ══════════════════════════════════════════════════
+flowchart LR
+    %% ── Styling ──
+    classDef obj fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+    classDef actor fill:#ffffff,stroke:#000000,stroke-width:1px,color:#000000
+    classDef store fill:#ffffff,stroke:#000000,stroke-width:1px,color:#000000,stroke-dasharray: 5 5
+
+    %% ── Actor ──
+    User(["👤 :User"]):::actor
+
+    %% ── Objects (name : Class notation) ──
+    UI[":DashboardUI"]:::obj
+    Fetcher[":ProfileFetcher"]:::obj
+    Extractor[":FeatureExtractor"]:::obj
+    Predictor[":PredictionEngine"]:::obj
+    HistMgr[":HistoryManager"]:::obj
+    RepGen[":ReportGenerator"]:::obj
+    DB[":DatabaseManager"]:::obj
+    ExtAPI[":ExternalAPI"]:::store
+
+    %% ── Links with Numbered Messages ──
+    %% Messages use decimal nested numbering
+    %% to show call hierarchy
+
+    User ---|"1: analyzeProfile(username)"| UI
+    UI ---|"1.1: fetch_profile(username)"| Fetcher
+    Fetcher ---|"1.1.1: HTTP GET /profile"| ExtAPI
+    Fetcher ---|"1.1.2: cache_profile(data)"| DB
+    UI ---|"1.2: extract_from_profile(data)"| Extractor
+    UI ---|"1.3: predict(features)"| Predictor
+    UI ---|"1.4: save_result(prediction)"| HistMgr
+    HistMgr ---|"1.4.1: save_search(result)"| DB
+    UI ---|"1.5: *[opt] generate_single_report()"| RepGen

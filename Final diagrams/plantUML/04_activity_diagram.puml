@@ -1,0 +1,54 @@
+@startuml
+skinparam BackgroundColor White
+skinparam activity {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+skinparam conditionStyle diamond
+
+start
+
+if (Already have an account?) then (No)
+  :Enter Registration Details;
+  :Save User to DB;
+else (Yes)
+endif
+
+:Enter Login Credentials;
+:Validate Credentials in DB;
+:Load Dashboard UI;
+
+if (Analysis Mode?) then (Live Fetch)
+  :Enter Instagram Username;
+  :Fetch via External API;
+  :Extract Raw JSON Data;
+else (Manual Entry)
+  :Manually Enter Profile Stats;
+endif
+
+:Engineer ML Features;
+:Pass Features to .pkl Model;
+:Calculate SHAP Values;
+
+if (Prediction Result?) then (Fake)
+  :Flag as Fake Profile;
+else (Genuine)
+  :Flag as Genuine Profile;
+endif
+
+:Save Result to History DB;
+:Display Prediction & Charts;
+
+switch (Action Needed?)
+case (Export Report)
+  :Generate PDF Report;
+case (View History)
+  :View Search History;
+case (Logout)
+endswitch
+
+:Log Out of System;
+
+stop
+@enduml

@@ -1,0 +1,26 @@
+classDiagram
+    %% Styling
+    classDef default fill:#ffffff,stroke:#000000,stroke-width:2px,color:#000000
+
+    class db_DatabaseManager {
+        db_path = "app.db"
+    }
+
+    class prediction_engine_PredictionEngine {
+        model = XGBClassifier
+        scaler = StandardScaler
+        explainer = TreeExplainer
+    }
+
+    class profile_fetcher_ProfileFetcher {
+        demo_mode = False
+        apify_token = env APIFY_TOKEN
+        rapidapi_key = env RAPIDAPI_KEY
+    }
+
+    class history_manager_HistoryManager {
+    }
+
+    %% Object Links
+    profile_fetcher_ProfileFetcher --> db_DatabaseManager : db
+    history_manager_HistoryManager --> db_DatabaseManager : db

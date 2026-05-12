@@ -1,0 +1,42 @@
+flowchart TD
+    %% Styling
+    classDef node fill:#f9f9f9,stroke:#333,stroke-width:2px,color:#000
+    classDef component fill:#e1f5fe,stroke:#01579b,stroke-width:1px,color:#000
+    classDef external fill:#fff3e0,stroke:#e65100,stroke-width:2px,stroke-dasharray: 5 5,color:#000
+    
+    subgraph Client_Device ["Client Device (PC / Mobile)"]
+        Browser[Web Browser\nHTML/CSS/JS]:::component
+    end
+    
+    subgraph App_Server ["Application Server (Python 3.x Environment)"]
+        direction TB
+        Streamlit[Streamlit Web Server]:::component
+        Core[Core Logic\nPredictor, Extractor, Fetcher]:::component
+        ML[ML Pipeline\nTrainer, Preprocessor]:::component
+    end
+    
+    subgraph Data_Storage ["Data & Storage Layer (Local File System)"]
+        SQLite[(SQLite Database\napp.db)]:::component
+        ModelStore[[Model Files\n.pkl]]:::component
+        CSVStore[[CSV Datasets\n.csv]]:::component
+    end
+    
+    subgraph External_APIs ["External Scraping Services"]
+        direction LR
+        Apify((Apify API)):::external
+        RapidAPI((RapidAPI)):::external
+    end
+    
+    %% Connections
+    Client_Device <-->|HTTPS / WSS| App_Server
+    Browser <--> Streamlit
+    Streamlit <--> Core
+    Core <--> ML
+    
+    Core <-->|SQL| SQLite
+    Core <-->|Read| ModelStore
+    ML <-->|Write| ModelStore
+    ML <-->|Read| CSVStore
+    
+    Core -.->|HTTP GET| Apify
+    Core -.->|HTTP GET| RapidAPI

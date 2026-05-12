@@ -1,0 +1,35 @@
+flowchart TD
+    %% Styling
+    classDef entity fill:#f9f9f9,stroke:#333,stroke-width:2px,color:#000
+    classDef process fill:#e1f5fe,stroke:#01579b,stroke-width:2px,shape:circle,color:#000
+    classDef datastore fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+
+    User[User / Admin]:::entity
+    ExtAPI[External APIs]:::entity
+    
+    P1((1.0 Profile<br/>Fetching &<br/>Extraction)):::process
+    P2((2.0 Model<br/>Prediction &<br/>Risk Scoring)):::process
+    P3((3.0 Report<br/>Generation)):::process
+    P4((4.0 Model<br/>Training<br/>Pipeline)):::process
+    P5((5.0 History<br/>Management)):::process
+
+    D1[(D1: USERS Table)]:::datastore
+    D2[(D2: ANALYSIS_HISTORY)]:::datastore
+    D3[(D3: MODEL_METADATA)]:::datastore
+    FS1[(FS1: .pkl Models)]:::datastore
+    FS2[(FS2: .csv Datasets)]:::datastore
+
+    User -->|Target Username| P1
+    P1 <-->|HTTP Request/Response| ExtAPI
+    P1 -->|Extracted Features| P2
+    P2 <-->|Load Best Model| FS1
+    P2 -->|Prediction Result,<br/>Risk Score| P5
+    P5 <-->|Save / Retrieve| D2
+    P5 -->|History Data| P3
+    P3 -->|PDF Report| User
+    P2 -->|Result Display| User
+    
+    User -->|Upload Dataset,<br/>Trigger Train| P4
+    P4 <-->|Read Data| FS2
+    P4 -->|Save Trained Model| FS1
+    P4 -->|Update Metrics| D3

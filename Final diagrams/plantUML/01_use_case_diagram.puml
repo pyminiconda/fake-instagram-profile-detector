@@ -1,0 +1,47 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "User" as user
+actor "System Admin" as admin
+
+admin -|> user : <<generalization>>
+
+rectangle "Fake Instagram Profile Detection System" {
+    usecase "Authenticate (Login/Sign Up)" as UC1
+    usecase "Analyze Live Profile via Username" as UC2
+    usecase "Analyze Manual Profile Stats" as UC3
+    usecase "Run Batch Profile Analysis" as UC4
+    usecase "View Analysis History" as UC5
+    usecase "Download PDF Report" as UC6
+    
+    usecase "View Dataset Insights" as UC7
+    usecase "Train Machine Learning Models" as UC8
+}
+
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+user --> UC5
+user --> UC6
+
+admin --> UC7
+admin --> UC8
+
+UC2 .> UC1 : <<include>>
+UC3 .> UC1 : <<include>>
+UC4 .> UC1 : <<include>>
+UC5 .> UC1 : <<include>>
+UC6 .> UC1 : <<include>>
+
+
+actor "External Scraping API\n(Apify / RapidAPI)" as API <<system>>
+
+UC2 -- API
+
+@enduml

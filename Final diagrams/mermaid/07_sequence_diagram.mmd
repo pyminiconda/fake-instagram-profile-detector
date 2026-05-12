@@ -1,0 +1,28 @@
+sequenceDiagram
+    autonumber
+    actor User as Bank User / Analyst
+    participant UI as Dashboard UI
+    participant Fetcher as Profile Fetcher
+    participant Extractor as Feature Extractor
+    participant Predictor as Prediction Engine
+    participant DB as Database / History Mgr
+    participant Report as Report Generator
+    
+    User->>UI: Enter Instagram Username
+    UI->>Fetcher: fetch_profile(username)
+    Fetcher->>Fetcher: Request from External API (Apify/RapidAPI)
+    Fetcher-->>UI: Raw Profile Data JSON
+    UI->>Extractor: extract_features(raw_data)
+    Extractor-->>UI: Engineered Features (DataFrame)
+    UI->>Predictor: predict(features)
+    Predictor->>Predictor: Load .pkl Model & Scaler
+    Predictor->>Predictor: Compute Risk Score & SHAP
+    Predictor-->>UI: Prediction Result (Fake/Real)
+    UI->>DB: save_analysis_history(result)
+    DB-->>UI: Confirm Save
+    opt Generate PDF
+        UI->>Report: generate_single_report(result)
+        Report-->>UI: PDF Document
+        UI-->>User: Download PDF
+    end
+    UI-->>User: Display Results & Risk Score

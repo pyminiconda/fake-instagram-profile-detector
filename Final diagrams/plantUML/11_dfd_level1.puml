@@ -1,0 +1,35 @@
+@startuml
+skinparam BackgroundColor White
+skinparam componentStyle rectangle
+
+rectangle "User / Admin" as User
+rectangle "External APIs" as ExtAPI
+
+usecase "1.0\nProfile Fetching\n& Extraction" as P1
+usecase "2.0\nModel Prediction\n& Risk Scoring" as P2
+usecase "3.0\nReport\nGeneration" as P3
+usecase "4.0\nModel Training\nPipeline" as P4
+usecase "5.0\nHistory\nManagement" as P5
+
+database "D1: USERS Table" as D1
+database "D2: ANALYSIS_HISTORY" as D2
+database "D3: MODEL_METADATA" as D3
+database "FS1: .pkl Models" as FS1
+database "FS2: .csv Datasets" as FS2
+
+User --> P1 : Target Username
+P1 <--> ExtAPI : HTTP Request/Response
+P1 --> P2 : Extracted Features
+P2 <--> FS1 : Load Best Model
+P2 --> P5 : Prediction Result, Risk Score
+P5 <--> D2 : Save / Retrieve
+P5 --> P3 : History Data
+P3 --> User : PDF Report
+P2 --> User : Result Display
+
+User --> P4 : Upload Dataset,\nTrigger Train
+P4 <--> FS2 : Read Data
+P4 --> FS1 : Save Trained Model
+P4 --> D3 : Update Metrics
+
+@enduml

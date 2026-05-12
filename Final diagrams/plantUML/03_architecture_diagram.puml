@@ -1,0 +1,72 @@
+@startuml
+skinparam componentStyle rectangle
+skinparam BackgroundColor White
+
+skinparam package {
+    BackgroundColor White
+    BorderColor Black
+}
+
+actor "User / Admin" as User
+
+package "1. Presentation Layer (Streamlit UI)" <<Presentation>> {
+    component "Auth UI" as AuthUI
+    component "Dashboard UI" as DashboardUI
+    component "Batch Analysis UI" as BatchUI
+    component "Admin Tools UI" as AdminUI
+}
+
+package "2. Business Logic Layer (Core Services)" <<Business>> {
+    component "Profile Fetcher" as ProfFetch
+    component "Feature Extractor" as FeatureExt
+    component "Prediction Engine" as PredEngine
+    component "History Manager" as HistMgr
+    component "Report Generator" as RepGen
+}
+
+package "3. Machine Learning Pipeline" <<ML>> {
+    component "Data Preprocessor" as Preprocess
+    component "Model Trainer" as Trainer
+    component "Model Evaluator" as Evaluator
+}
+
+package "4. Data & External Integration Layer" <<Data>> {
+    database "SQLite Database\n(app.db)" as DB
+    file ".pkl Model Storage" as ModelStore
+    file "CSV Datasets" as Dataset
+    cloud "External Scraping APIs\n(Apify / RapidAPI)" as ExtAPI
+}
+
+' User Interactions
+User --> AuthUI
+User --> DashboardUI
+User --> BatchUI
+User --> AdminUI
+
+' Presentation to Business
+AuthUI --> HistMgr
+DashboardUI --> ProfFetch
+DashboardUI --> PredEngine
+DashboardUI --> RepGen
+BatchUI --> PredEngine
+AdminUI --> Preprocess
+AdminUI --> Trainer
+
+' Business Logic Flow
+ProfFetch --> FeatureExt : Raw Data
+FeatureExt --> PredEngine : Engineered Features
+PredEngine --> HistMgr : Results
+HistMgr --> RepGen : History Data
+
+' ML Pipeline Flow
+Preprocess --> Trainer : Cleaned Data
+Evaluator --> Trainer : Metrics
+
+' Data Access
+HistMgr --> DB : Read/Write
+ProfFetch ..> ExtAPI : HTTP Requests
+Trainer --> ModelStore : Saves Models
+PredEngine --> ModelStore : Loads Models
+Trainer --> Dataset : Reads Data
+
+@enduml
