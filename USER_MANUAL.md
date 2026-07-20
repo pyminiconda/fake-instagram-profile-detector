@@ -447,14 +447,49 @@ The Admin Panel provides access to:
 - **Model management** — view model metrics, re-trigger training
 - **System statistics** — total analyses, fake/real ratio, etc.
 
-**To access the Admin Panel:**
+#### Default Superadmin Account (Auto-Created on First Run)
+
+When the backend starts for the **very first time** on a fresh database, it automatically creates a built-in superadmin account. You will see the following message printed in Terminal 1:
+
+```
+============================================================
+[WARNING] DEFAULT ADMIN ACCOUNT CREATED
+    Username : admin
+    Email    : admin@mail.com
+    Password : admin@123
+    -> Change the password immediately!
+============================================================
+```
+
+Use these credentials to log in and access the Admin Panel right away — **no database editing required**.
+
+| Field | Value |
+|-------|-------|
+| **Email** | `admin@mail.com` |
+| **Password** | `admin@123` |
+| **Role** | Superadmin (full access) |
+
+> **Security warning:** Change the default password immediately after first login via the **Settings** page.
+
+#### Role Levels
+
+| Role | `is_admin` | `is_superadmin` | Access |
+|------|-----------|----------------|--------|
+| Regular User | 0 | 0 | Dashboard, History, Profile |
+| Admin | 1 | 0 | All above + Admin Panel (users, model, stats) |
+| Superadmin | 1 | 1 | All above + cannot be demoted by other admins |
+
+#### Promoting an Existing User to Admin
+
+If you want to promote your own account (or any other user) to admin after signing up:
 
 1. Download [DB Browser for SQLite](https://sqlitebrowser.org/) (free).
 2. Open `app.db` (located in the ROOT folder) with it.
-3. Go to the **"Browse Data"** tab and select the `users` table.
-4. Find your user row and set `is_admin` to `1`.
+3. Go to the **"Browse Data"** tab and select the `USERS` table.
+4. Find the user row and set `is_admin` to `1` (and optionally `is_superadmin` to `1`).
 5. Click **"Write Changes"** and close the file.
 6. Log out of InstaGuard and log back in — the **Admin** link will appear in the sidebar.
+
 
 ---
 
