@@ -1,5 +1,6 @@
 # ── Secrets / Environment ────────────────────────────────────────────────────
 .env
+PROJECT_INFO.txt
 # (keep .env.example — it contains no real secrets)
 
 # ── Python virtual environments ──────────────────────────────────────────────
