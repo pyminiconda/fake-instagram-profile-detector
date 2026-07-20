@@ -1,33 +1,59 @@
-# Environment
+# ── Secrets / Environment ────────────────────────────────────────────────────
 .env
+# (keep .env.example — it contains no real secrets)
+
+# ── Python virtual environments ──────────────────────────────────────────────
 .venv/
 venv/
 env/
 
-# Database
+# ── Database ─────────────────────────────────────────────────────────────────
 app.db
+*.db-journal
+*.db-wal
+*.db-shm
 
-# Models (removed strict ignore to bundle)
-# models/*.pkl
+# ── ML Models (comment out if you want to bundle .pkl files) ─────────────────
+# ml_pipeline/models/*.pkl
 
-# Python
+# ── Python bytecode / build artefacts ───────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
 *.egg-info/
 dist/
 build/
+*.so
 
-# Jupyter
+# ── Test & Coverage output ───────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── Jupyter ──────────────────────────────────────────────────────────────────
 .ipynb_checkpoints/
 
-# IDE
+# ── Frontend (Node) ──────────────────────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── IDE / Editor ─────────────────────────────────────────────────────────────
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# OS
+# ── OS artefacts ─────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Temp reports
+# ── Temporary reports & logs ──────────────────────────────────────────────────
 reports/
+*.log
+logs/
